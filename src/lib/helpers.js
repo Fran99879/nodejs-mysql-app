@@ -1,21 +1,19 @@
-const helpers = {};
 const bcrypt = require('bcryptjs');
 
-//metodo para cifrar contraseña en el registro
+const helpers = {};
+
 helpers.encryptPassword = async (password) => {
-    const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(password, salt);
-    return hash;
+  const salt = await bcrypt.genSalt(10);
+  const hash = await bcrypt.hash(password, salt);
+  return hash;
 };
 
-//metodo para comprar contraseñas en el signup
-helpers.mathPassword = async (passport, savedPassword) => {
-    try{
-        return await bcrypt.compare(passport, savedPassword);
-    } catch (e) {
-        console.log()
-    }
-    
+helpers.matchPassword = async (password, savedPassword) => {
+  try {
+    return await bcrypt.compare(password, savedPassword);
+  } catch (e) {
+    console.log(e)
+  }
 };
 
 module.exports = helpers;

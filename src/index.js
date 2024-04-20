@@ -1,3 +1,5 @@
+const dotenv = require('dotenv');
+dotenv.config();
 const express = require('express');
 const morgan = require('morgan');
 const { engine } = require("express-handlebars");
@@ -6,9 +8,10 @@ const flash = require('connect-flash');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const passport = require('passport');
+const validator = require('express-validator');
+const bodyParser = require('body-parser');
 
-
-const { database } = require('./keys.js')
+//const { database } = require('./keys.js')
 
 // initializations
 const app = express();
@@ -27,16 +30,24 @@ app.engine("hbs", engine({
 app.set('view engine', '.hbs')
 
 // Middlewares
-app.use(session({
-    secret: 'franciscoismaelcaslini',
-    resave: false,
-    saveUninitialized: false,
-    store: new MySQLStore(database)
-}));
-app.use(flash());
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+app.use(session({
+    secret: process.env.DB_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: new MySQLStore() // Aquí pasamos la instancia de MySQLStore
+}));
+
+/*app.use(session({
+    secret: process.env.DB_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: new MySQLStore()
+}));*/
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -45,6 +56,7 @@ app.use(passport.session());
 app.use((req, res, next) => {
     app.locals.success = req.flash('success');
     app.locals.message = req.flash('message');
+    app.locals.user = req.user;
     next();
 });
 
@@ -60,6 +72,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 // Starting the Server
+
 app.listen(app.get('port'), () => {
     console.log('Server on Port', app.get('port'));
 });
